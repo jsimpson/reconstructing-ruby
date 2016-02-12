@@ -1,7 +1,7 @@
 all: ruby
 
-ruby: lex.yy.c
-	cc -o ruby lex.yy.c
+ruby: main.c lex.yy.c
+	cc -o ruby main.c lex.yy.c
 
 lex.yy.c: ruby.l
 	flex ruby.l
