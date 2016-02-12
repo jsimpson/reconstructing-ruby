@@ -3,10 +3,11 @@
     #include "parse.tab.h"
 
     #define VTYPE(type, value) printf("%s(%s)\n", type, value)
-    #define TYPE(type) printf("%s\n", type)
+    #define TOKEN(id) return t##id
 %}
 
 %option noyywrap
+%option yylineno
 
 NUMBER [0-9](_[0-9]|[0-9])*
 
@@ -19,32 +20,37 @@ NUMBER [0-9](_[0-9]|[0-9])*
 {NUMBER} { yylval = atoi(yytext); return tNUMBER; }
 [a-z_][a-zA-Z0-9_]* { VTYPE("ID", yytext); }
 [A-Z][a-zA-Z0-9_]* { VTYPE("CONSTANT", yytext); }
-"=" { TYPE("EQUAL"); }
-">" { TYPE("GT"); }
-"<" { TYPE("LT"); }
-">=" { TYPE("GTE"); }
-"<=" { TYPE("LTE"); }
-"!=" { TYPE("NEQUAL"); }
+"=" { TOKEN(EQUAL); }
+">" { TOKEN(GT); }
+"<" { TOKEN(LT); }
+">=" { TOKEN(GTE); }
+"<=" { TOKEN(LTE); }
+"!=" { TOKEN(NEQUAL); }
 "+" { return tPLUS; }
-"-" { TYPE("MINUS"); }
-"*" { TYPE("MULT"); }
-"/" { TYPE("DIV"); }
-"%" { TYPE("MOD"); }
-"!" { TYPE("EMARK"); }
-"?" { TYPE("QMARK"); }
-"&" { TYPE("AND"); }
-"|" { TYPE("OR"); }
-"[" { TYPE("LSBRACE"); }
-"]" { TYPE("RSBRACE"); }
-"(" { TYPE("LPAREN"); }
-")" { TYPE("RPAREN"); }
-"{" { TYPE("LBRACE"); }
-"}" { TYPE("RBRACE"); }
-"@" { TYPE("AT"); }
-"." { TYPE("DOT"); }
-"," { TYPE("COMMA"); }
-":" { TYPE("COLON"); }
+"-" { TOKEN(MINUS); }
+"*" { TOKEN(MULT); }
+"/" { TOKEN(DIV); }
+"%" { TOKEN(MOD); }
+"!" { TOKEN(EMARK); }
+"?" { TOKEN(QMARK); }
+"&" { TOKEN(AND); }
+"|" { TOKEN(OR); }
+"[" { TOKEN(LSBRACE); }
+"]" { TOKEN(RSBRACE); }
+"(" { TOKEN(LPAREN); }
+")" { TOKEN(RPAREN); }
+"{" { TOKEN(LBRACE); }
+"}" { TOKEN(RBRACE); }
+"@" { TOKEN(AT); }
+"." { TOKEN(DOT); }
+"," { TOKEN(COMMA); }
+":" { TOKEN(COLON); }
 [\t ] {}
 \n {}
 . { fprintf(stderr, "Unknown token: '%s'\n", yytext); }
 
+%%
+
+void yyerror(const char * s) {
+    fprintf(stderr, "%s. Unexpected \"%s\" on line %d\n", s, yytext, yylineno);
+}
